@@ -28,7 +28,20 @@ public sealed class IssuePolicyHandler : IHandleMessages<IssuePolicy>
             throw new InvalidOperationException($"Policy application '{message.ApplicationId}' was not found.");
         }
 
-        application.Approve(new RiskScore(message.RiskScore));
+        if (application.Status is PolicyApplicationStatus.Cancelled or PolicyApplicationStatus.Rejected or PolicyApplicationStatus.Issued)
+        {
+            return;
+        }
+
+        if (application.Status == PolicyApplicationStatus.Underwriting)
+        {
+            application.Approve(new RiskScore(message.RiskScore));
+        }
+        else if (application.Status != PolicyApplicationStatus.Approved)
+        {
+            return;
+        }
+
         application.MarkIssued();
         await applicationRepository.UpdateAsync(application, context.CancellationToken);
 

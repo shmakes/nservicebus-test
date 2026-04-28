@@ -44,6 +44,7 @@ public sealed class PolicyIssuedHandler : IHandleMessages<PolicyIssued>
             application with
             {
                 Status = "Issued",
+                PolicyId = message.PolicyId,
                 RiskScore = message.RiskScore,
                 UpdatedOnUtc = message.IssuedOnUtc,
                 Timeline = updatedTimeline

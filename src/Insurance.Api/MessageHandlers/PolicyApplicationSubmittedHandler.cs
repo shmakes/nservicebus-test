@@ -18,6 +18,7 @@ public sealed class PolicyApplicationSubmittedHandler : IHandleMessages<PolicyAp
     {
         return readStore.UpsertAsync(new PolicyApplicationView(
             message.ApplicationId,
+            PolicyId: null,
             message.CustomerId,
             message.CoverageType,
             message.RequestedAmount,

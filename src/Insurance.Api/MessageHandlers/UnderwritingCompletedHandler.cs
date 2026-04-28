@@ -22,6 +22,11 @@ public sealed class UnderwritingCompletedHandler : IHandleMessages<UnderwritingC
             return;
         }
 
+        if (current.Status is "Cancelled" or "Rejected" or "Issued")
+        {
+            return;
+        }
+
         var updatedStatus = message.Approved ? "Approved" : "Rejected";
         var updatedReason = message.Approved ? null : message.Reason;
         var timestamp = DateTimeOffset.UtcNow;

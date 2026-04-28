@@ -2,6 +2,7 @@ namespace Insurance.Application.Models;
 
 public sealed record PolicyApplicationView(
     Guid ApplicationId,
+    Guid? PolicyId,
     Guid CustomerId,
     string CoverageType,
     decimal RequestedAmount,

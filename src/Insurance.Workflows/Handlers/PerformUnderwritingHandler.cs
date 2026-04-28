@@ -28,10 +28,20 @@ public sealed class PerformUnderwritingHandler : IHandleMessages<PerformUnderwri
             throw new InvalidOperationException($"Policy application '{message.ApplicationId}' was not found.");
         }
 
+        if (application.Status is PolicyApplicationStatus.Cancelled or PolicyApplicationStatus.Rejected or PolicyApplicationStatus.Issued)
+        {
+            return;
+        }
+
         if (application.Status == PolicyApplicationStatus.Submitted)
         {
             application.StartUnderwriting();
             await repository.UpdateAsync(application, context.CancellationToken);
+        }
+
+        if (application.Status != PolicyApplicationStatus.Underwriting)
+        {
+            return;
         }
 
         var decision = await underwritingService.EvaluateAsync(application, context.CancellationToken);
