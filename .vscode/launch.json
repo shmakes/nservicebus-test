@@ -1,0 +1,38 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Insurance.Api",
+      "type": "coreclr",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/Insurance.Api/bin/Debug/net8.0/Insurance.Api.dll",
+      "cwd": "${workspaceFolder}/src/Insurance.Api",
+      "stopAtEntry": false,
+      "console": "integratedTerminal",
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_URLS": "http://localhost:5077"
+      }
+    },
+    {
+      "name": "Insurance.Workflows",
+      "type": "coreclr",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/Insurance.Workflows/bin/Debug/net8.0/Insurance.Workflows.dll",
+      "cwd": "${workspaceFolder}/src/Insurance.Workflows",
+      "stopAtEntry": false,
+      "console": "integratedTerminal"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Launch API + Workflows",
+      "preLaunchTask": "prepare-debug",
+      "stopAll": true,
+      "configurations": [
+        "Insurance.Workflows",
+        "Insurance.Api"
+      ]
+    }
+  ]
+}

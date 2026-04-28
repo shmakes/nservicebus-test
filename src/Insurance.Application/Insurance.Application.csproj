@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>Insurance.Application</AssemblyName>
+    <RootNamespace>Insurance.Application</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Insurance.Domain\Insurance.Domain.csproj" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>Insurance.Workflows.Tests</AssemblyName>
+    <RootNamespace>Insurance.Workflows.Tests</RootNamespace>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Insurance.Workflows\Insurance.Workflows.csproj" />
+    <ProjectReference Include="..\..\src\Insurance.Infrastructure\Insurance.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\Insurance.Messages\Insurance.Messages.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="*" />
+    <PackageReference Include="xunit" Version="*" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="*" />
+    <PackageReference Include="NServiceBus.Testing" Version="9.*" />
+  </ItemGroup>
+</Project>

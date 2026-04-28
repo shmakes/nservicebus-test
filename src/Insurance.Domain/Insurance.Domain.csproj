@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>Insurance.Domain</AssemblyName>
+    <RootNamespace>Insurance.Domain</RootNamespace>
+  </PropertyGroup>
+</Project>

@@ -1,0 +1,41 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "cleanup-insurance-processes",
+      "type": "process",
+      "command": "powershell",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}/.vscode/cleanup-insurance-processes.ps1"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "build",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+        "build",
+        "${workspaceFolder}/nservicebus-test.sln"
+      ],
+      "problemMatcher": "$msCompile",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "prepare-debug",
+      "dependsOrder": "sequence",
+      "dependsOn": [
+        "cleanup-insurance-processes",
+        "build"
+      ],
+      "problemMatcher": []
+    }
+  ]
+}
