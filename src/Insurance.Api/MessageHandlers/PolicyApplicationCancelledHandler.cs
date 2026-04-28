@@ -21,12 +21,19 @@ public sealed class PolicyApplicationCancelledHandler : IHandleMessages<PolicyAp
             return;
         }
 
+        var timestamp = DateTimeOffset.UtcNow;
+        var updatedTimeline = new Dictionary<string, DateTimeOffset>(current.Timeline)
+        {
+            ["Cancelled"] = timestamp
+        };
+
         await readStore.UpsertAsync(
             current with
             {
                 Status = "Cancelled",
                 Reason = message.Reason,
-                UpdatedOnUtc = DateTimeOffset.UtcNow
+                UpdatedOnUtc = timestamp,
+                Timeline = updatedTimeline
             },
             context.CancellationToken);
     }

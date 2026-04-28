@@ -24,6 +24,11 @@ public sealed class UnderwritingCompletedHandler : IHandleMessages<UnderwritingC
 
         var updatedStatus = message.Approved ? "Approved" : "Rejected";
         var updatedReason = message.Approved ? null : message.Reason;
+        var timestamp = DateTimeOffset.UtcNow;
+        var updatedTimeline = new Dictionary<string, DateTimeOffset>(current.Timeline)
+        {
+            [updatedStatus] = timestamp
+        };
 
         await readStore.UpsertAsync(
             current with
@@ -31,7 +36,8 @@ public sealed class UnderwritingCompletedHandler : IHandleMessages<UnderwritingC
                 Status = updatedStatus,
                 RiskScore = message.RiskScore,
                 Reason = updatedReason,
-                UpdatedOnUtc = DateTimeOffset.UtcNow
+                UpdatedOnUtc = timestamp,
+                Timeline = updatedTimeline
             },
             context.CancellationToken);
     }

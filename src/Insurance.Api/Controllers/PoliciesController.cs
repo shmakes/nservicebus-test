@@ -1,8 +1,10 @@
 using Insurance.Api.Contracts;
 using Insurance.Application.Abstractions;
+using Insurance.Domain;
 using Insurance.Messages;
 using Microsoft.AspNetCore.Mvc;
 using NServiceBus;
+using System.Text.RegularExpressions;
 
 namespace Insurance.Api.Controllers;
 
@@ -24,21 +26,38 @@ public sealed class PoliciesController : ControllerBase
         this.policyReadStore = policyReadStore;
     }
 
+    [HttpGet("examples")]
+    [ProducesResponseType(typeof(PolicyApiExamplesResponse), StatusCodes.Status200OK)]
+    public IActionResult GetExamples()
+    {
+        return Ok(new PolicyApiExamplesResponse());
+    }
+
     [HttpPost("applications")]
     [ProducesResponseType(typeof(object), StatusCodes.Status202Accepted)]
     public async Task<IActionResult> SubmitApplication(
         [FromBody] SubmitPolicyApplicationRequest request,
         CancellationToken cancellationToken)
     {
+        if (!TryNormalizeAndValidateRequest(request, out var normalizedCoverageType, out var normalizedCurrency, out var validationError))
+        {
+            return BadRequest(new
+            {
+                error = validationError,
+                allowedCoverageTypes = Enum.GetNames<CoverageType>(),
+                allowedCurrencies = new[] { "USD", "CAD", "EUR", "GBP" }
+            });
+        }
+
         var applicationId = Guid.NewGuid();
 
         await messageSession.Send(new SubmitPolicyApplication
         {
             ApplicationId = applicationId,
             CustomerId = request.CustomerId,
-            CoverageType = request.CoverageType,
+            CoverageType = normalizedCoverageType!,
             RequestedAmount = request.RequestedAmount,
-            Currency = request.Currency
+            Currency = normalizedCurrency!
         }, cancellationToken);
 
         return AcceptedAtAction(
@@ -79,5 +98,51 @@ public sealed class PoliciesController : ControllerBase
     {
         var view = await policyReadStore.GetAsync(policyId, cancellationToken);
         return view is null ? NotFound() : Ok(view);
+    }
+
+    private static bool TryNormalizeAndValidateRequest(
+        SubmitPolicyApplicationRequest request,
+        out string? normalizedCoverageType,
+        out string? normalizedCurrency,
+        out string? error)
+    {
+        normalizedCoverageType = null;
+        normalizedCurrency = null;
+        error = null;
+
+        if (!Enum.TryParse<CoverageType>(request.CoverageType, ignoreCase: true, out var coverageType))
+        {
+            error = "Invalid coverageType. Use one of: Auto, Home, Life, Health.";
+            return false;
+        }
+
+        normalizedCoverageType = coverageType.ToString();
+
+        if (string.IsNullOrWhiteSpace(request.Currency))
+        {
+            error = "Currency is required.";
+            return false;
+        }
+
+        var currency = request.Currency.Trim().ToUpperInvariant();
+        if (!Regex.IsMatch(currency, "^[A-Z]{3}$"))
+        {
+            error = "Currency must be a 3-letter ISO-style code, for example USD.";
+            return false;
+        }
+
+        var allowedCurrencies = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "USD", "CAD", "EUR", "GBP"
+        };
+
+        if (!allowedCurrencies.Contains(currency))
+        {
+            error = "Unsupported currency. Use one of: USD, CAD, EUR, GBP.";
+            return false;
+        }
+
+        normalizedCurrency = currency;
+        return true;
     }
 }

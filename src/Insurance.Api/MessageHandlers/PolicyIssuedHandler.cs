@@ -35,12 +35,18 @@ public sealed class PolicyIssuedHandler : IHandleMessages<PolicyIssued>
             return;
         }
 
+        var updatedTimeline = new Dictionary<string, DateTimeOffset>(application.Timeline)
+        {
+            ["Issued"] = message.IssuedOnUtc
+        };
+
         await applicationReadStore.UpsertAsync(
             application with
             {
                 Status = "Issued",
                 RiskScore = message.RiskScore,
-                UpdatedOnUtc = message.IssuedOnUtc
+                UpdatedOnUtc = message.IssuedOnUtc,
+                Timeline = updatedTimeline
             },
             context.CancellationToken);
     }

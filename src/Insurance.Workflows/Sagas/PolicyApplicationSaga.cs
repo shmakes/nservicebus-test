@@ -11,6 +11,8 @@ public sealed class PolicyApplicationSaga :
     IHandleMessages<CancelPolicyApplication>,
     IHandleTimeouts<UnderwritingTimeout>
 {
+    private static readonly TimeSpan StageDelay = TimeSpan.FromSeconds(15);
+
     protected override void ConfigureHowToFindSaga(SagaPropertyMapper<PolicyApplicationSagaData> mapper)
     {
         mapper.MapSaga(saga => saga.ApplicationId)
@@ -31,16 +33,20 @@ public sealed class PolicyApplicationSaga :
         Data.Currency = message.Currency;
         Data.Status = "Submitted";
 
-        await context.SendLocal(new PerformUnderwriting
+        var underwritingSendOptions = new SendOptions();
+        underwritingSendOptions.RouteToThisEndpoint();
+        underwritingSendOptions.DelayDeliveryWith(StageDelay);
+
+        await context.Send(new PerformUnderwriting
         {
             ApplicationId = message.ApplicationId
-        });
+        }, underwritingSendOptions);
 
         Data.Status = "Underwriting";
 
         await RequestTimeout(
             context,
-            TimeSpan.FromSeconds(30),
+            TimeSpan.FromSeconds(60),
             new UnderwritingTimeout
             {
                 ApplicationId = message.ApplicationId
@@ -69,11 +75,15 @@ public sealed class PolicyApplicationSaga :
         }
 
         Data.Status = "Approved";
-        await context.SendLocal(new IssuePolicy
+        var issuePolicySendOptions = new SendOptions();
+        issuePolicySendOptions.RouteToThisEndpoint();
+        issuePolicySendOptions.DelayDeliveryWith(StageDelay);
+
+        await context.Send(new IssuePolicy
         {
             ApplicationId = message.ApplicationId,
             RiskScore = message.RiskScore
-        });
+        }, issuePolicySendOptions);
     }
 
     public Task Handle(PolicyIssued message, IMessageHandlerContext context)

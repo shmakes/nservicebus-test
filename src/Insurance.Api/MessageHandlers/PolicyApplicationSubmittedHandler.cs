@@ -25,6 +25,10 @@ public sealed class PolicyApplicationSubmittedHandler : IHandleMessages<PolicyAp
             Status: "Submitted",
             RiskScore: null,
             Reason: null,
-            UpdatedOnUtc: message.SubmittedOnUtc), context.CancellationToken);
+            UpdatedOnUtc: message.SubmittedOnUtc,
+            Timeline: new Dictionary<string, DateTimeOffset>
+            {
+                ["Submitted"] = message.SubmittedOnUtc
+            }), context.CancellationToken);
     }
 }

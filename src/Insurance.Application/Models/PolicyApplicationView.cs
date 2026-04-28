@@ -9,4 +9,5 @@ public sealed record PolicyApplicationView(
     string Status,
     int? RiskScore,
     string? Reason,
-    DateTimeOffset UpdatedOnUtc);
+    DateTimeOffset UpdatedOnUtc,
+    IReadOnlyDictionary<string, DateTimeOffset> Timeline);

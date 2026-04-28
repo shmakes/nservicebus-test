@@ -21,12 +21,19 @@ public sealed class PolicyApplicationRejectedHandler : IHandleMessages<PolicyApp
             return;
         }
 
+        var timestamp = DateTimeOffset.UtcNow;
+        var updatedTimeline = new Dictionary<string, DateTimeOffset>(current.Timeline)
+        {
+            ["Rejected"] = timestamp
+        };
+
         await readStore.UpsertAsync(
             current with
             {
                 Status = "Rejected",
                 Reason = message.Reason,
-                UpdatedOnUtc = DateTimeOffset.UtcNow
+                UpdatedOnUtc = timestamp,
+                Timeline = updatedTimeline
             },
             context.CancellationToken);
     }
